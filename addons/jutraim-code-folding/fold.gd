@@ -1,7 +1,7 @@
 @tool
 extends EditorPlugin
 
-var grid_menu_button: Button
+var grid_menu_button: MenuButton
 var grid_popup: PopupPanel
 var grid: GridContainer
 
@@ -69,11 +69,12 @@ func _enter_tree():
 	else:
 		preview_highlight_color = Color(0.5, 0.5, 0.0, 0.3)
 
-	grid_menu_button = Button.new()
+	grid_menu_button = MenuButton.new()
 	grid_menu_button.toggle_mode = true
 	grid_menu_button.flat = true
 	grid_menu_button.text = "Folding"
-	grid_menu_button.pressed.connect(_on_show_grid_popup)
+	grid_menu_button.switch_on_hover = true
+	grid_menu_button.about_to_popup.connect(_on_show_grid_popup)
 
 	grid_popup = PopupPanel.new()
 	grid_popup.visibility_changed.connect(_on_popup_visibility_changed)
@@ -126,9 +127,20 @@ func _enter_tree():
 	grid_menu_button.add_child(grid_popup)
 
 	var toolbar = EditorInterface.get_script_editor().get_child(0).get_child(0)
+
+	var last_menu_button_index = -1
+	for i in range(toolbar.get_child_count()):
+		var child = toolbar.get_child(i)
+		if child is MenuButton:
+			last_menu_button_index = i
+
 	toolbar.add_child(grid_menu_button)
-	if toolbar.get_child_count() > 28 && toolbar.get_child(28):
-		toolbar.move_child(grid_menu_button, 28)
+
+	print(toolbar.get_child(last_menu_button_index).button_group)
+
+	if toolbar.get_child(last_menu_button_index):
+		toolbar.move_child(grid_menu_button, last_menu_button_index + 1)
+		print("yES", last_menu_button_index)
 	else:
 		grid_menu_button.move_to_front()
 
