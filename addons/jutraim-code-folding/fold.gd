@@ -84,6 +84,16 @@ func _enter_tree():
 	grid = local_grid
 	grid_popup.add_child(local_grid)
 
+	local_grid.minimum_size_changed.connect(func():
+		var tween = grid_popup.create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CIRC)
+		var stylebox = grid_popup.get_theme_stylebox("panel", "PopupPanel")
+		var margins = stylebox.get_minimum_size().y
+		var target_height = local_grid.get_combined_minimum_size().y + margins
+		tween.tween_property(grid_popup, "max_size:y", target_height, 0.2)
+		grid_popup.max_size.x = local_grid.get_combined_minimum_size().x + stylebox.get_minimum_size().x
+		grid_popup.size.x = grid_popup.max_size.x
+		)
+
 	for item_setup in action_setup:
 
 		var collapse_button = Button.new()
@@ -92,7 +102,7 @@ func _enter_tree():
 
 		collapse_button.flat = true
 		collapse_button.self_modulate = item_setup.color
-		collapse_button.tooltip_text = "Collapse " + item_setup.category_text
+		collapse_button.tooltip_text = "Fold " + item_setup.category_text
 		collapse_button.pressed.connect(_on_grid_action_pressed.bind(item_setup.collapse_action))
 		collapse_button.mouse_entered.connect(_on_button_mouse_entered.bind(item_setup.collapse_action, item_setup.color if item_setup.color is Color else Color.WHITE))
 		collapse_button.mouse_exited.connect(_clear_all_preview_highlights)
@@ -136,11 +146,8 @@ func _enter_tree():
 
 	toolbar.add_child(grid_menu_button)
 
-	print(toolbar.get_child(last_menu_button_index).button_group)
-
 	if toolbar.get_child(last_menu_button_index):
 		toolbar.move_child(grid_menu_button, last_menu_button_index + 1)
-		print("yES", last_menu_button_index)
 	else:
 		grid_menu_button.move_to_front()
 
